@@ -1,30 +1,42 @@
 # LockPort
 
-![LockPort logo](assets/branding/lockport-logo-256.png)
+<div align="center">
+  <img src="assets/branding/lockport-logo-256.png" alt="LockPort logo" width="180">
+  
+  ![Windows](https://img.shields.io/badge/Windows-11-blue?logo=windows&logoColor=white)
+  ![Python](https://img.shields.io/badge/Python-3.13+-green?logo=python&logoColor=white)
+  ![License](https://img.shields.io/badge/License-MIT-yellow)
+  ![Security](https://img.shields.io/badge/Security-USB_Control-red?logo=shield&logoColor=white)
+</div>
 
-LockPort is a lightweight Windows background service that automatically locks newly inserted USB storage devices until a user enters the correct PIN. It is designed for small offices and kiosks that need a straightforward way to keep random flash drives from mounting without authorization.
+---
 
-## Features
+**LockPort** is a lightweight Windows background service that automatically locks newly inserted USB storage devices until a user enters the correct PIN. It is designed for small offices and kiosks that need a straightforward way to keep random flash drives from mounting without authorization.
 
-- Watches USB arrivals via Windows WMI and disables devices immediately (removals automatically re-lock the port so reinserts are gated again).
-- Pops up a topmost PIN dialog per device with Correction/Accept/Exit controls (Exit immediately stops the service) and shows the renamed drive label plus the port/drive letter that detected it. The last successful PIN entry is cached (DPAPI-protected) for a couple of minutes so other admin tools (like the device window) can reuse it without nagging the user again.
-- Stores PINs using salted PBKDF2 hashes; default PIN is `0000` until changed.
-- Includes a CLI helper to change the PIN, clear lockouts, or view status.
-- Tracks the latest state (locked/unlocked) for every observed USB storage device.
-- Logs all actions to `%ProgramData%/LockPort/lockport.log` with rotation.
+## ✨ Features
 
-## Project layout
+- 🔒 **USB Device Control** - Watches USB arrivals via Windows WMI and disables devices immediately (removals automatically re-lock the port so reinserts are gated again)
+- 📱 **PIN Authentication** - Pops up a topmost PIN dialog per device with Correction/Accept/Exit controls and shows the renamed drive label plus the port/drive letter that detected it
+- 🔐 **Secure Storage** - Stores PINs using salted PBKDF2 hashes with DPAPI protection; default PIN is `0000` until changed
+- ⚙️ **CLI Management** - Includes a command-line helper to change the PIN, clear lockouts, or view status
+- 📊 **Device Tracking** - Tracks the latest state (locked/unlocked) for every observed USB storage device
+- 📝 **Activity Logging** - Logs all actions to `%ProgramData%/LockPort/lockport.log` with rotation
+
+## 📁 Project Layout
 
 ```text
-lockport/             # Core package (monitor, PIN manager, GUI, service)
-lockport_service.py   # Entry point for the always-on monitor
-lockport_tray.py      # Background monitor with a taskbar icon
-lockport_cli.py       # Admin helper for setting/changing the PIN
-requirements.txt      # Runtime dependencies (pywin32 + wmi)
-README.md             # This file
+📦 LockPort/
+├── 🔧 lockport/                  # Core package (monitor, PIN manager, GUI, service)
+├── 🖥️ lockport_service.py        # Entry point for the always-on monitor
+├── 🗱️ lockport_tray.py           # Background monitor with a taskbar icon
+├── ⌨️ lockport_cli.py            # Admin helper for setting/changing the PIN
+├── 📋 requirements.txt           # Runtime dependencies (pywin32 + wmi)
+├── 🎨 assets/branding/           # Logo and icon assets
+├── 📦 installer/                 # MSI packaging and build scripts
+└── 📖 README.md                  # This file
 ```
 
-## Quick start
+## 🚀 Quick Start
 
 1. **Create and activate a virtual environment** (PowerShell example):
 
@@ -76,26 +88,26 @@ python lockport_service.py --console-log
 
 Running this way ensures both `Disable-PnpDevice` and the `pnputil` fallback are allowed to actually turn off the USB device before the PIN prompt succeeds.
 
-## CLI reference
+## 🖥️ CLI Reference
 
-- `python lockport_cli.py status` – shows failed attempt counts and lockout state.
-- `python lockport_cli.py set-pin` – prompts for current and new PIN.
-- `python lockport_cli.py reset-lockout` – clears lockout timer after an incident.
-- `python lockport_cli.py device-state` – lists tracked USB devices with their last-known drive, label, and status.
-- `python lockport_cli.py device-window` – opens a small Tkinter window showing live device states (run inside an interactive Windows session) and now provides Lock/Unlock buttons (unlocking requires the admin PIN).
+- 📊 `python lockport_cli.py status` – shows failed attempt counts and lockout state
+- 🔑 `python lockport_cli.py set-pin` – prompts for current and new PIN
+- 🔓 `python lockport_cli.py reset-lockout` – clears lockout timer after an incident
+- 📱 `python lockport_cli.py device-state` – lists tracked USB devices with their last-known drive, label, and status
+- 🪟 `python lockport_cli.py device-window` – opens a small Tkinter window showing live device states (run inside an interactive Windows session) and now provides Lock/Unlock buttons (unlocking requires the admin PIN)
 
-  - If you unlocked a device moments ago in the main service dialog, the cached PIN is automatically reused here—just click **Unlock selected** without typing again.
-  - Append `--background-monitor` to spin up the always-on monitor plus a taskbar tray icon that confirms LockPort is active; the tray menu includes **Show Device Window** and **Stop Monitoring** shortcuts. Add `--console-log` if you also want logs mirrored to the launching console.
+  - If you unlocked a device moments ago in the main service dialog, the cached PIN is automatically reused here—just click **Unlock selected** without typing again
+  - Append `--background-monitor` to spin up the always-on monitor plus a taskbar tray icon that confirms LockPort is active; the tray menu includes **Show Device Window** and **Stop Monitoring** shortcuts. Add `--console-log` if you also want logs mirrored to the launching console
 
-- `python lockport_cli.py autostart <enable|disable|status>` – manage the scheduled task that launches `lockport_service.py` at logon with highest privileges so background monitoring is automatic.
+- ⚙️ `python lockport_cli.py autostart <enable|disable|status>` – manage the scheduled task that launches `lockport_service.py` at logon with highest privileges so background monitoring is automatic
 
-> Tip: the service now enumerates any removable drives that were already connected when it started, so existing USB sticks also trigger the PIN prompt immediately.
+> 💡 **Tip:** The service now enumerates any removable drives that were already connected when it started, so existing USB sticks also trigger the PIN prompt immediately.
 
-- Append `--skip-current-check` to `set-pin` when running in an elevated admin session and the current PIN is unknown.
+- 🔧 Append `--skip-current-check` to `set-pin` when running in an elevated admin session and the current PIN is unknown
 
 Device state snapshots are persisted at `%ProgramData%/LockPort/device_states.json`. The CLI simply surfaces this file so administrators can audit which ports/devices attempted to connect and whether they were unlocked.
 
-## Testing
+## 🧪 Testing
 
 Run the focused unit tests (covers the PIN store logic) with:
 
@@ -103,9 +115,9 @@ Run the focused unit tests (covers the PIN store logic) with:
 python -m pytest
 ```
 
-## Notes & limitations
+## ⚠️ Notes & Limitations
 
-- Device disabling/enabling uses PowerShell `Disable-PnpDevice` / `Enable-PnpDevice` which require administrator privileges.
+- 🔧 Device disabling/enabling uses PowerShell `Disable-PnpDevice` / `Enable-PnpDevice` which require administrator privileges
 - On some hardware `Disable-PnpDevice` returns a generic failure; LockPort will automatically fall back to `pnputil /disable-device` / `pnputil /enable-device`, but these commands also require an elevated session.
 - The Tkinter PIN prompt must run within an interactive desktop session; if the service is launched in Session 0 it will not be visible.
 - The USB monitor uses WMI and currently targets mass-storage insert events (EventType `2`). Additional filtering or policy decisions (e.g., whitelists) can be added inside `lockport/service.py`.
