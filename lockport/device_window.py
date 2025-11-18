@@ -1,6 +1,7 @@
 """Tkinter window for viewing + controlling USB/Type-C device states."""
 from __future__ import annotations
 
+import base64
 import queue
 import threading
 import time
@@ -13,6 +14,7 @@ from .device_locker import DeviceLocker
 from .device_state import DeviceState, DeviceStateStore
 from .pin_store import PinLockedError, PinManager, PinValidationError
 from .usb_monitor import USBEvent, USBMonitor
+from .resources import asset_path, load_asset_bytes
 
 REFRESH_SECONDS = 1.0
 RECENT_UNLOCK_SECONDS = 10.0
@@ -42,6 +44,21 @@ def launch_device_window(pin_manager: PinManager) -> None:
     root.geometry("780x520")
     root.minsize(720, 480)
     root.resizable(True, True)
+
+    def _apply_branding_icon(widget: tk.Tk) -> None:
+        try:
+            encoded = base64.b64encode(load_asset_bytes("app-logo-256.png")).decode(
+                "ascii"
+            )
+            icon_photo = tk.PhotoImage(data=encoded)
+            widget.iconphoto(True, icon_photo)
+            widget._lockport_icon = icon_photo  # type: ignore[attr-defined]
+            with asset_path("app-icon.ico") as ico_path:
+                widget.iconbitmap(default=str(ico_path))
+        except Exception:
+            pass
+
+    _apply_branding_icon(root)
 
     columns = ("Device", "Status", "Port", "Label", "Updated")
     tree = ttk.Treeview(root, columns=columns, show="headings", height=10)

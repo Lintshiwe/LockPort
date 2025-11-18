@@ -20,6 +20,20 @@ $pyInstallerArgs = @(
     "--onefile"
 )
 
+$iconSource = Join-Path $repoRoot "lockport/resources/app-icon.ico"
+if (Test-Path $iconSource) {
+    $resolvedIcon = Resolve-Path $iconSource
+    $pyInstallerArgs = $pyInstallerArgs + @("--icon", $resolvedIcon)
+} else {
+    Write-Warning "LockPort icon not found at $iconSource; executables will use defaults."
+}
+
+$resourceDir = Join-Path $repoRoot "lockport/resources"
+if (Test-Path $resourceDir) {
+    $resolvedResources = Resolve-Path $resourceDir
+    $pyInstallerArgs = $pyInstallerArgs + @("--add-data", "$resolvedResources;lockport/resources")
+}
+
 $pyinstallerWork = Join-Path $PSScriptRoot "pyinstaller"
 $payloadDir = Join-Path $PSScriptRoot "payload"
 $objDir = Join-Path $PSScriptRoot "obj"

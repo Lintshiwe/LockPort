@@ -6,10 +6,12 @@ import logging
 import os
 import sys
 import threading
+from io import BytesIO
 from typing import TYPE_CHECKING, Optional
 
 from lockport.device_window import launch_device_window
 from lockport.service import LockPortService
+from lockport.resources import load_asset_bytes
 
 try:  # pragma: no cover - UI dependency checked at runtime
     import pystray
@@ -35,7 +37,7 @@ class LockPortTrayApp:
         self.service = LockPortService(console_log=console_log)
         self.icon = pystray.Icon(
             "LockPort",
-            self._build_image(),
+            self._load_tray_image(),
             "LockPort Monitor",
             menu=pystray.Menu(
                 pystray.MenuItem("Show Device Window", self._on_open_device_window),
@@ -46,7 +48,14 @@ class LockPortTrayApp:
         self._window_lock = threading.Lock()
         self._window_active = False
 
-    def _build_image(self) -> "PILImage":
+    def _load_tray_image(self) -> "PILImage":
+        try:
+            icon_bytes = load_asset_bytes("app-logo-256.png")
+            return Image.open(BytesIO(icon_bytes)).resize((64, 64), Image.LANCZOS)
+        except Exception:
+            return self._build_fallback_image()
+
+    def _build_fallback_image(self) -> "PILImage":
         size = 64
         image = Image.new("RGBA", (size, size), (38, 50, 56, 255))
         draw = ImageDraw.Draw(image)

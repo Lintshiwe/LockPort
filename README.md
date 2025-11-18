@@ -1,5 +1,7 @@
 # LockPort
 
+![LockPort logo](assets/branding/lockport-logo-256.png)
+
 LockPort is a lightweight Windows background service that automatically locks newly inserted USB storage devices until a user enters the correct PIN. It is designed for small offices and kiosks that need a straightforward way to keep random flash drives from mounting without authorization.
 
 ## Features
