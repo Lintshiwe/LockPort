@@ -107,3 +107,9 @@ python -m pytest
 - On some hardware `Disable-PnpDevice` returns a generic failure; LockPort will automatically fall back to `pnputil /disable-device` / `pnputil /enable-device`, but these commands also require an elevated session.
 - The Tkinter PIN prompt must run within an interactive desktop session; if the service is launched in Session 0 it will not be visible.
 - The USB monitor uses WMI and currently targets mass-storage insert events (EventType `2`). Additional filtering or policy decisions (e.g., whitelists) can be added inside `lockport/service.py`.
+
+## Branding assets
+
+- Rebuild the app logo and favicon any time by running `python tools/generate_brand_assets.py` (requires `pip install -r requirements-dev.txt`).
+- Outputs land in `assets/branding/` as high-resolution PNGs plus `lockport-favicon.ico` for the website/installer.
+- Point PyInstaller’s `--icon` flag (or `lockport.wxs`) at the generated ICO to brand the binaries and MSI.
