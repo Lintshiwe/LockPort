@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?ifndef ProductVersion?>
+<?define ProductVersion = 1.0.0 ?>
+<?endif?>
+<?ifndef PayloadDir?>
+<?define PayloadDir = payload ?>
+<?endif?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="LockPort"
+           Language="1033"
+           Version="$(var.ProductVersion)"
+           Manufacturer="LockPort"
+           UpgradeCode="{AA224E14-98E0-4E1A-A52F-1D8F953AB0C1}">
+    <Package InstallerVersion="500"
+             Compressed="yes"
+             InstallScope="perMachine" />
+
+    <MediaTemplate EmbedCab="yes" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Condition Message="Administrator permissions are required to install [ProductName].">
+      Privileged
+    </Condition>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="ARPPRODUCTICON" Value="LockPortIcon" />
+    <Icon Id="LockPortIcon" SourceFile="$(var.PayloadDir)\lockport-cli.exe" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="LockPort" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuDir" Name="LockPort" />
+      </Directory>
+      <Directory Id="DesktopFolder" />
+    </Directory>
+
+    <ComponentGroup Id="ProductComponents">
+      <Component Id="cmpLockPortCli" Guid="*" Directory="INSTALLFOLDER">
+        <File Id="filLockPortCli" KeyPath="yes" Source="$(var.PayloadDir)\lockport-cli.exe" />
+      </Component>
+
+      <Component Id="cmpLockPortService" Guid="*" Directory="INSTALLFOLDER">
+        <File Id="filLockPortService" KeyPath="yes" Source="$(var.PayloadDir)\lockport-service.exe" />
+      </Component>
+
+      <Component Id="cmpLockPortTray" Guid="*" Directory="INSTALLFOLDER">
+        <File Id="filLockPortTray" KeyPath="yes" Source="$(var.PayloadDir)\lockport-tray.exe" />
+      </Component>
+
+      <Component Id="cmpDesktopShortcut" Guid="*" Directory="DesktopFolder">
+        <Shortcut Id="DesktopShortcut"
+                  Name="LockPort Device Window"
+                  Target="[#filLockPortCli]"
+                  Arguments="device-window"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="LockPortIcon"
+                  IconIndex="0" />
+        <RegistryValue Root="HKCU"
+                        Key="Software\LockPort"
+                        Name="DesktopShortcut"
+                        Type="integer"
+                        Value="1"
+                        KeyPath="yes" />
+      </Component>
+
+      <Component Id="cmpProgramMenuShortcut" Guid="*" Directory="ProgramMenuDir">
+        <Shortcut Id="StartMenuShortcut"
+                  Name="LockPort Device Window"
+                  Target="[#filLockPortCli]"
+                  Arguments="device-window"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="LockPortIcon"
+                  IconIndex="0" />
+        <RemoveFolder Id="RemoveProgramMenuDir" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                        Key="Software\LockPort"
+                        Name="StartMenuShortcut"
+                        Type="integer"
+                        Value="1"
+                        KeyPath="yes" />
+      </Component>
+
+      <Component Id="cmpTrayProgramMenuShortcut" Guid="*" Directory="ProgramMenuDir">
+        <Shortcut Id="TrayStartMenuShortcut"
+                  Name="LockPort Tray"
+                  Target="[#filLockPortTray]"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="LockPortIcon"
+                  IconIndex="0" />
+        <RegistryValue Root="HKCU"
+                        Key="Software\LockPort"
+                        Name="TrayShortcut"
+                        Type="integer"
+                        Value="1"
+                        KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <Feature Id="ProductFeature" Title="LockPort" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseFile)" />
+  </Product>
+</Wix>
